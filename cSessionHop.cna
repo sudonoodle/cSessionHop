@@ -9,11 +9,11 @@
 # Register help/usage for cSessionHop
 beacon_command_register(
 "cSessionHop",
-"cSessionHop: Tool that utilizes the IHxHelpPaneServer COM object, configured to run as an Interactive User, to hijack specified user sessions.",
+"Uses the IHxHelpPaneServer COM object to hijack specified user sessions",
 "\ncSessionHop: Session hijacking technique that utilizes the IHxHelpPaneServer COM object, which is configured to run as an Interactive User, and can be utilzied to hijack specified user sessions.
-Usage: cSessionHop [SESSIONID] [FILEPATH]
-SESSIONID: Target session ID (use Explorer => Process List for sessions)
-FILEPATH: Path to executable on target system (e.g., notepad.exe, C:\\Windows\\System32\\cmd.exe)"
+\nUsage: cSessionHop [SESSIONID] [FILEPATH]
+\nSESSIONID: Target session ID (use Explorer => Process List for sessions)
+FILEPATH: Path to executable on target system (e.g., notepad.exe, C:\\Windows\\System32\\cmd.exe)","bof"
 );
 
 # Setup cSessionHop
@@ -70,6 +70,6 @@ alias cSessionHop {
 
     # Run the BOF
     # go = Entry point of the BOF
-    btask($bid, "Running cSessionHop with SessionId: $sessionId and FilePath: $filePath");
+    btask($bid, "Tasked beacon to run cSessionHop with SessionId: $sessionId and FilePath: $filePath");
     beacon_inline_execute($bid, $data, "go", $args);
 }
